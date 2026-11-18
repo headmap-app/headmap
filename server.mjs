@@ -22,7 +22,7 @@ const TYPES = {
 const ALLOWED_DIRS = ['src', 'vendor', 'assets', 'icons'];
 const ALLOWED_FILES = new Set(['/index.html', '/style.css', '/manifest.webmanifest', '/LICENSE']);
 const NO_EXTENSION = new Set(['LICENSE']); // 授權全文沒有副檔名，當純文字送
-const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'";
+const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"; // 與 _headers 相同
 
 const server = http.createServer(async (req, res) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405); res.end(); return; }
@@ -42,6 +42,7 @@ const server = http.createServer(async (req, res) => {
       'Cache-Control': url.startsWith('/vendor/') || url.startsWith('/assets/') ? 'public, max-age=3600' : 'no-store',
       'X-Content-Type-Options': 'nosniff',
       'Referrer-Policy': 'no-referrer',
+      'X-Frame-Options': 'DENY',
       'Content-Security-Policy': CSP,
     });
     res.end(req.method === 'HEAD' ? undefined : data);

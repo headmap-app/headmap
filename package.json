@@ -1,6 +1,6 @@
 {
   "name": "headmap",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "畫剪髮圖解的網頁：3D 頭模與 2D 五視圖 / Haircut diagram drawing app: 3D head models and 2D five-view charts",
   "keywords": ["hairdressing", "haircut", "diagram", "head-sheet", "3d", "threejs", "static-site"],

@@ -52,7 +52,7 @@ From then on, every new commit on `main` in your repository is deployed automati
 
 **Without GitHub:** in step 2 choose **Upload assets** instead, name the project, and drag the unpacked folder in. To update, upload again.
 
-The `_headers` file in the repository is read by Cloudflare Pages: it serves the licence text (`LICENSE`) as plain text and stops the site's address from being sent to other sites as a referrer. Leave it as it is.
+The `_headers` file in the repository is read by Cloudflare Pages: it serves the licence text (`LICENSE`) as plain text, stops the site's address from being sent to other sites as a referrer, and adds security settings: other sites cannot embed this page in theirs, and the page only loads code from its own address. Leave it as it is.
 
 ## GitHub Pages
 
@@ -106,6 +106,10 @@ server {
     # File names carry no version hash: revalidate every time so updates show up at once
     add_header Cache-Control "no-cache";
     add_header Referrer-Policy "no-referrer";
+    # Security settings, the same as in _headers
+    add_header X-Content-Type-Options "nosniff";
+    add_header X-Frame-Options "DENY";
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
 
     location = /LICENSE { default_type text/plain; }
     # If you deploy with git clone, do not serve the .git folder
@@ -117,6 +121,7 @@ Notes:
 
 - **Turn on HTTPS.** "Add to Home Screen" and the phone's share / save-to-photos sheet do not work on addresses without HTTPS (`localhost` is the exception).
 - **Do not set long cache lifetimes on `index.html`, `style.css` or `src/`.** These file names carry no version hash, so a long cache keeps users on an old version.
+- On your own server, add the security settings from `_headers` yourself (the nginx example above already has them).
 - `.js` files must be served with a JavaScript type (`text/javascript` or `application/javascript`); web servers do this by default. Unknown types for `.glb` and `.webmanifest` are fine.
 - `server.mjs` is a small server for local preview. For a public site use one of the platforms above or a regular web server. To let phones on the same Wi-Fi try it for a moment, run `node server.mjs --lan`.
 
@@ -140,6 +145,7 @@ Everything works without changing anything. If you do customize, these are the u
 | `manifest.webmanifest` | The name (`name`, `short_name`) and colours used when added to the home screen |
 | `icons/` | Three icons: 192×192, 512×512 and 180×180 (`apple-touch-icon.png`) |
 | `assets/heads/heads.json` | `default` = the head model used for new 3D drawings; `default2d` = the head model used for 2D |
+| `Content-Security-Policy` in `_headers` | If your changes load anything from another address (fonts, analytics and so on), add that address here or the browser will block it. Change the same line in `server.mjs` too |
 
 After changing a head model's landmark data (`assets/heads/*.json`), run `node tools/build-transfer.mjs` to regenerate the reference points used when switching head models.
 

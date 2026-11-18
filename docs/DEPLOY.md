@@ -50,7 +50,7 @@
 
 **不用 GitHub 的做法**：步驟 2 改選 **Upload assets（上傳檔案）**，取專案名稱，把解壓縮後的整個資料夾拖進去。之後要更新就再上傳一次。
 
-repo 裡的 `_headers` 是給 Cloudflare Pages 看的：讓授權全文（`LICENSE`）用文字顯示，並且不把來源網址帶給別的網站。不用改。
+repo 裡的 `_headers` 是給 Cloudflare Pages 看的：讓授權全文（`LICENSE`）用文字顯示、不把來源網址帶給別的網站，也加了安全設定：不讓別的網站把這個網頁嵌進他們的頁面，網頁也只准載入自己網址上的程式。不用改。
 
 ## GitHub Pages
 
@@ -104,6 +104,10 @@ server {
     # 檔名沒有版本號：每次都向伺服器確認有沒有新版，更新才會馬上生效
     add_header Cache-Control "no-cache";
     add_header Referrer-Policy "no-referrer";
+    # 安全設定，與 _headers 相同
+    add_header X-Content-Type-Options "nosniff";
+    add_header X-Frame-Options "DENY";
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
 
     location = /LICENSE { default_type text/plain; }
     # 用 git clone 放檔案的話，別把 .git 送出去
@@ -115,6 +119,7 @@ server {
 
 - **請開 HTTPS。** 「加入主畫面」和手機的「分享／存到相簿」在沒有 HTTPS 的網址上不能用（`localhost` 例外）。
 - **不要對 `index.html`、`style.css`、`src/` 設很長的快取時間。** 這些檔名沒有版本號，快取太久，使用者會一直看到舊版。
+- `_headers` 裡的安全設定在自己的主機上要自己加（上面的 nginx 範例已經加好了）。
 - `.js` 檔要用 JavaScript 的型別送（`text/javascript` 或 `application/javascript`），一般伺服器預設就是。`.glb`、`.webmanifest` 的型別不認得也沒關係。
 - `server.mjs` 是給本機預覽用的小伺服器，正式上線請用上面的平台或一般的網頁伺服器。只想臨時給同一個 Wi-Fi 的手機試，可以用 `node server.mjs --lan`。
 
@@ -138,6 +143,7 @@ server {
 | `manifest.webmanifest` | 加到主畫面時的名稱（`name`、`short_name`）與顏色 |
 | `icons/` | 三張圖示：192×192、512×512、180×180（`apple-touch-icon.png`） |
 | `assets/heads/heads.json` | `default`＝3D 新增時用哪顆頭模；`default2d`＝2D 用哪顆 |
+| `_headers` 的 `Content-Security-Policy` | 改程式要從別的網址載入東西（字型、統計工具等）時，把那個網址加進去，不然瀏覽器會擋掉。`server.mjs` 裡的同一行也一起改 |
 
 改過頭模的點位資料（`assets/heads/*.json`）之後，要重跑 `node tools/build-transfer.mjs`，重新產生換頭模用的對照點。
 
